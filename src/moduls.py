@@ -15,12 +15,12 @@ class Product:
 
 
 class Category:
+    category_count: int = 0
+    product_count: int = 0
+
     name: str
     description: str
     products: List[Product]
-
-    category_count: int = 0
-    product_count: int = 0
 
     def __init__(self, name: str, description: str, products: List[Product]):
         self.name = name
