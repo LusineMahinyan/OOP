@@ -53,4 +53,4 @@ if __name__ == "__main__":
     for category in categories:
         print(f"Категория: {category.name}, товаров: {len(category.products)}")
         for product in category.products:
-            print(f" - {product.name}: {product.price} руб.")
+            print(f" - {product.name}: {product.price} руб. Остаток: {product.quantity} шт.\n")
