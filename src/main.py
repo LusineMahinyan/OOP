@@ -52,5 +52,5 @@ if __name__ == "__main__":
     categories = load_categories_from_json("data/products.json")
     for category in categories:
         print(f"Категория: {category.name}, товаров: {len(category.products)}")
-        for product in category.products:  # теперь это список Product
+        for product in category.products:
             print(f" - {product.name}: {product.price} руб.")
