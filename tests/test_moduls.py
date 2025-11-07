@@ -33,7 +33,9 @@ def test_category_initialization(sample_products: List[Product]) -> None:
     category = Category("Смартфоны", "Описание категории", sample_products)
     assert category.name == "Смартфоны"
     assert category.description == "Описание категории"
-    assert category.products == sample_products
+    products_str = category.products
+    for product in sample_products:
+        assert product.name in products_str
 
 
 def test_category_and_product_count(sample_products: List[Product]) -> None:
@@ -50,3 +52,36 @@ def test_category_and_product_count(sample_products: List[Product]) -> None:
 
     assert Category.category_count == 2
     assert Category.product_count == len(sample_products) + 1
+
+def test_add_product(category: Category) -> None:
+    """Проверка метода add_product"""
+    initial_count = Category.product_count
+    new_product = Product("OnePlus 12", "256GB", 90000.0, 4)
+    category.add_product(new_product)
+    assert Category.product_count == initial_count + 1
+    assert "OnePlus 12" in category.products
+
+
+def test_product_price_setter_positive() -> None:
+    """Проверка корректного изменения цены"""
+    product = Product("Xiaomi", "128GB", 31000.0, 10)
+    product.price = 35000.0
+    assert product.price == 35000.0
+
+
+def test_product_price_setter_negative(capsys) -> None:
+    """Проверка на отрицательную цену"""
+    product = Product("Xiaomi", "128GB", 31000.0, 10)
+    product.price = -100
+    captured = capsys.readouterr()
+    assert "Цена не должна быть нулевая или отрицательная" in captured.out
+    assert product.price == 31000.0
+
+
+def test_new_product_merges_existing() -> None:
+    """Проверка слияния товаров при одинаковом имени"""
+    existing = [Product("Iphone 15", "512GB", 200000.0, 5)]
+    new_data = {"name": "Iphone 15", "description": "512GB", "price": 210000.0, "quantity": 3}
+    product = Product.new_product(new_data, existing)
+    assert product.quantity == 8
+    assert product.price == 210000.0
