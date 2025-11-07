@@ -14,6 +14,10 @@ def sample_products() -> List[Product]:
         Product("Xiaomi Redmi Note 11", "1024GB, Синий", 31000.0, 14),
     ]
 
+@pytest.fixture
+def category(sample_products) -> Category:
+    return Category("Смартфоны", "Категория для смартфонов", sample_products)
+
 
 def test_product_initialization() -> None:
     """Проверка корректности инициализации Product"""
