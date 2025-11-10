@@ -50,6 +50,15 @@ class Product:
         )
         return new_product
 
+    def __str__(self) -> str:
+        """Возвращает строковое представление продукта"""
+        return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
+
+    def __add__(self, other: "Product") -> float:
+        """Возвращает сумму стоимости остатков двух продуктов"""
+        total = (self.price * self.quantity) + (other.price * other.quantity)
+        return float(total)
+
 
 class Category:
     category_count: int = 0
@@ -82,3 +91,10 @@ class Category:
         for product in self.__products:
             result += f"{product.name}, {product.price} руб. Остаток: {product.quantity} шт.\n"
         return result.strip()
+
+    def __str__(self) -> str:
+        """Возвращает строковое представление категории"""
+        total_quantity = 0
+        for product in self.__products:
+            total_quantity += product.quantity
+        return f"{self.name}, количество продуктов: {total_quantity} шт."

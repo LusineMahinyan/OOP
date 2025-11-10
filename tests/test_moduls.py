@@ -85,3 +85,20 @@ def test_new_product_merges_existing() -> None:
     product = Product.new_product(new_data, existing)
     assert product.quantity == 8
     assert product.price == 210000.0
+
+
+def test_product_str() -> None:
+    product = Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
+    assert str(product) == "Iphone 15, 210000.0 руб. Остаток: 8 шт."
+
+
+def test_product_add() -> None:
+    p_1 = Product("Xiaomi", "Redmi", 30000.0, 10)
+    p_2 = Product("Samsung", "Galaxy", 60000.0, 5)
+    result = p_1 + p_2
+    assert result == (30000.0 * 10) + (60000.0 * 5)
+
+
+def test_category_str(sample_products) -> None:
+    category = Category("Смартфоны", "Описание", sample_products)
+    assert str(category) == "Смартфоны, количество продуктов: 27 шт."
