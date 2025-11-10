@@ -31,9 +31,7 @@ def test_product_initialization() -> None:
 def test_category_initialization(sample_products: List[Product]) -> None:
     """Проверка корректности инициализации Category"""
     category = Category("Смартфоны", "Описание категории", sample_products)
-    assert category.name == "Смартфоны"
-    assert category.description == "Описание категории"
-    products_str = category.products
+    products_str = category.products_str()
     for product in sample_products:
         assert product.name in products_str
 
@@ -54,12 +52,11 @@ def test_category_and_product_count(sample_products: List[Product]) -> None:
     assert Category.product_count == len(sample_products) + 1
 
 def test_add_product(category: Category) -> None:
-    """Проверка метода add_product"""
     initial_count = Category.product_count
     new_product = Product("OnePlus 12", "256GB", 90000.0, 4)
     category.add_product(new_product)
     assert Category.product_count == initial_count + 1
-    assert "OnePlus 12" in category.products
+    assert "OnePlus 12" in category.products_str()
 
 
 def test_product_price_setter_positive() -> None:

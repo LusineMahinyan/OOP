@@ -71,12 +71,13 @@ class Category:
     def __init__(self, name: str, description: str, products: Optional[List[Product]] = None) -> None:
         self.name = name
         self.description = description
-        self.__products = products or []
+        self.__products = products if products is not None else []
 
         Category.category_count += 1
         Category.product_count += len(self.__products)
 
     def add_product(self, product: Product) -> None:
+        """Добавляет продукт в приватный список и увеличивает счетчик продуктов"""
         self.__products.append(product)
         Category.product_count += 1
 
@@ -98,3 +99,20 @@ class Category:
         for product in self.__products:
             total_quantity += product.quantity
         return f"{self.name}, количество продуктов: {total_quantity} шт."
+
+
+class CategoryIterator:
+    def __init__(self, category: Category) -> None:
+        self._products = category.products
+        self._index = 0
+
+    def __iter__(self) -> "CategoryIterator":
+        return self
+
+    def __next__(self) -> "Product":
+        if self._index < len(self._products):
+            product = self._products[self._index]
+            self._index += 1
+            return product
+        else:
+            raise StopIteration

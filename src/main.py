@@ -1,5 +1,5 @@
 from src.data_loader import load_categories_from_json
-from src.moduls import Category, Product
+from src.moduls import Category, Product, CategoryIterator
 
 if __name__ == "__main__":
     product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
@@ -77,3 +77,7 @@ if __name__ == "__main__":
     print(product1 + product2)
     print(product1 + product3)
     print(product2 + product3)
+
+    print("\nИтерация через CategoryIterator:")
+    for product in CategoryIterator(category1):
+         print(product)
