@@ -1,5 +1,5 @@
 from src.data_loader import load_categories_from_json
-from src.moduls import Category, CategoryIterator, LawnGrass, Product, Smartphone
+from src.moduls import Category, CategoryIterator, LawnGrass, Order, Product, Smartphone
 
 if __name__ == "__main__":
     product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
@@ -211,3 +211,8 @@ if __name__ == "__main__":
 
     print(Category.category_count)
     print(Category.product_count)
+
+if __name__ == "__main__":
+    smartphone = Smartphone("Iphone 15", "512GB", 210000.0, 8, 98.2, "15", 512, "Gray")
+    order1 = Order(smartphone, 3)
+    print(order1)

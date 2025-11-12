@@ -2,7 +2,7 @@ from typing import List
 
 import pytest
 
-from src.moduls import Category, Product, Smartphone, LawnGrass
+from src.moduls import Category, Product, Smartphone, LawnGrass, BaseProduct
 
 
 @pytest.fixture
@@ -93,14 +93,6 @@ def test_lawngrass_inherits_product() -> None:
     assert grass.color == "Зеленый"
 
 
-def test_add_same_class_products() -> None:
-    """Складывание продуктов одного класса"""
-    smartphone1 = Smartphone("Iphone 15", "512GB", 200000.0, 5, 97.0, "15 Pro", 512, "Gray")
-    smartphone2 = Smartphone("Iphone 14", "256GB", 150000.0, 3, 90.0, "14 Pro", 256, "Black")
-    result = smartphone1 + smartphone2
-    assert result == (200000.0 * 5) + (150000.0 * 3)
-
-
 def test_add_different_class_products_raises_typeerror() -> None:
     """Попытка сложить продукты разных классов вызывает TypeError"""
     smartphone = Smartphone("Samsung", "Galaxy", 100000.0, 5, 95.5, "S23", 256, "Серый")
@@ -120,3 +112,43 @@ def test_add_product_allows_only_product_instances() -> None:
 
     with pytest.raises(TypeError):
         category.add_product("Не продукт")
+
+
+def test_inheritance_from_baseproduct():
+    p = Product("Test", "Desc", 100, 1)
+    s = Smartphone("TestPhone", "Desc", 200, 2, 90, "X", 128, "Black")
+    g = LawnGrass("Grass", "Desc", 50, 10, "RU", "5 дней", "Green")
+
+    assert isinstance(p, BaseProduct)
+    assert isinstance(s, BaseProduct)
+    assert isinstance(g, BaseProduct)
+
+
+
+def test_add_same_class_products():
+    p1 = Product("A", "Desc", 100, 2)
+    p2 = Product("B", "Desc", 200, 3)
+    s1 = Smartphone("Phone1", "Desc", 200, 1, 90, "X", 128, "Black")
+    s2 = Smartphone("Phone2", "Desc", 300, 2, 95, "Y", 256, "White")
+
+    assert p1 + p2 == 100 * 2 + 200 * 3
+    assert s1 + s2 == 200 * 1 + 300 * 2
+
+
+def test_add_different_class_raises_typeerror():
+    p = Product("A", "Desc", 100, 1)
+    g = LawnGrass("Grass", "Desc", 50, 10, "RU", "5 дней", "Green")
+
+    with pytest.raises(TypeError):
+        _ = p + g
+
+
+def test_category_add_product_typecheck():
+    from src.moduls import Category
+    cat = Category("TestCat", "Desc", [])
+    p = Product("A", "Desc", 100, 1)
+
+    cat.add_product(p)
+
+    with pytest.raises(TypeError):
+        cat.add_product("Не продукт")
