@@ -59,31 +59,6 @@ def test_add_product(category: Category) -> None:
     assert "OnePlus 12" in category.products_str()
 
 
-def test_product_price_setter_positive() -> None:
-    """Проверка корректного изменения цены"""
-    product = Product("Xiaomi", "128GB", 31000.0, 10)
-    product.price = 35000.0
-    assert product.price == 35000.0
-
-
-def test_product_price_setter_negative(capsys) -> None:
-    """Проверка на отрицательную цену"""
-    product = Product("Xiaomi", "128GB", 31000.0, 10)
-    product.price = -100
-    captured = capsys.readouterr()
-    assert "Цена не должна быть нулевая или отрицательная" in captured.out
-    assert product.price == 31000.0
-
-
-def test_new_product_merges_existing() -> None:
-    """Проверка слияния товаров при одинаковом имени"""
-    existing = [Product("Iphone 15", "512GB", 200000.0, 5)]
-    new_data = {"name": "Iphone 15", "description": "512GB", "price": 210000.0, "quantity": 3}
-    product = Product.new_product(new_data, existing)
-    assert product.quantity == 8
-    assert product.price == 210000.0
-
-
 def test_product_str() -> None:
     product = Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
     assert str(product) == "Iphone 15, 210000.0 руб. Остаток: 8 шт."

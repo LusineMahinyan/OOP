@@ -1,54 +1,31 @@
-from typing import Any, Dict, List, Optional
+from abc import ABC, abstractmethod
+from typing import List, Optional
 
 
-class Product:
-    name: str
-    description: str
-    price: float
-    quantity: int
+class BaseProduct(ABC):
+    """Абстрактный класс для всех продуктов"""
 
+    @abstractmethod
     def __init__(self, name: str, description: str, price: float, quantity: int):
         self.name = name
         self.description = description
-        self.__price = price
+        self.price = price
         self.quantity = quantity
 
-    @property  # type: ignore[no-redef]
-    def price(self) -> float:
-        """Геттер для цены"""
-        return self.__price
+    @abstractmethod
+    def __str__(self) -> str:
+        pass
 
-    @price.setter
-    def price(self, new_price: float) -> None:
-        """Сеттер для цены с проверкой на положительное значение"""
-        if new_price <= 0:
-            print("Цена не должна быть нулевая или отрицательная")
-            return
-        if new_price < self.__price:
-            answer = input(f"Вы действительно хотите понизить цену с {self.__price} до {new_price}? (y/n): ").lower()
-            if answer != "y":
-                print("Действие отменено. Цена не изменена.")
-                return
+    @abstractmethod
+    def __add__(self, other: "BaseProduct") -> float:
+        pass
 
-        self.__price = new_price
 
-    @classmethod
-    def new_product(cls, data: Dict[str, Any], existing_products: Optional[List["Product"]] = None) -> "Product":
+class Product(BaseProduct):
+    """Класс для общего продукта"""
 
-        if existing_products is None:
-            existing_products = []
-
-        for product in existing_products:
-            if product.name == data["name"]:
-                product.quantity += data["quantity"]
-                if data["price"] > product.price:
-                    product.price = data["price"]
-                return product
-
-        new_product = cls(
-            name=data["name"], description=data["description"], price=data["price"], quantity=data["quantity"]
-        )
-        return new_product
+    def __init__(self, name: str, description: str, price: float, quantity: int):
+        super().__init__(name, description, price, quantity)
 
     def __str__(self) -> str:
         """Возвращает строковое представление продукта"""
@@ -66,7 +43,7 @@ class Smartphone(Product):
     """Класс, представляющий смартфон, как товар"""
 
     def __init__(
-        self,
+            self,
         name: str,
         description: str,
         price: float,
