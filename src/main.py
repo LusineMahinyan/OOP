@@ -159,7 +159,7 @@ if __name__ == "__main__":
     print(Category.product_count)
 
     try:
-        category_smartphones.add_product("Not a product")
+        category_smartphones.add_product("Не продукт")
     except TypeError:
         print("Возникла ошибка TypeError при добавлении не продукта")
     else:

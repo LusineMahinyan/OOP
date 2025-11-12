@@ -2,7 +2,7 @@ from typing import List
 
 import pytest
 
-from src.moduls import Category, Product
+from src.moduls import Category, Product, Smartphone, LawnGrass
 
 
 @pytest.fixture
@@ -99,3 +99,49 @@ def test_product_add() -> None:
 def test_category_str(sample_products) -> None:
     category = Category("Смартфоны", "Описание", sample_products)
     assert str(category) == "Смартфоны, количество продуктов: 27 шт."
+
+
+def test_smartphone_inherits_product() -> None:
+    """Проверяет, что Smartphone наследуется от Product"""
+    smartphone = Smartphone("Samsung", "Galaxy", 100000.0, 5, 95.5, "S23", 256, "Серый")
+    assert isinstance(smartphone, Product)
+    assert smartphone.model == "S23"
+    assert smartphone.memory == 256
+    assert smartphone.color == "Серый"
+
+
+def test_lawngrass_inherits_product() -> None:
+    """Проверяет, что LawnGrass наследуется от Product"""
+    grass = LawnGrass("Газон", "Элитная трава", 500.0, 20, "Россия", "7 дней", "Зеленый")
+    assert isinstance(grass, Product)
+    assert grass.country == "Россия"
+    assert grass.color == "Зеленый"
+
+
+def test_add_same_class_products() -> None:
+    """Складывание продуктов одного класса"""
+    smartphone1 = Smartphone("Iphone 15", "512GB", 200000.0, 5, 97.0, "15 Pro", 512, "Gray")
+    smartphone2 = Smartphone("Iphone 14", "256GB", 150000.0, 3, 90.0, "14 Pro", 256, "Black")
+    result = smartphone1 + smartphone2
+    assert result == (200000.0 * 5) + (150000.0 * 3)
+
+
+def test_add_different_class_products_raises_typeerror() -> None:
+    """Попытка сложить продукты разных классов вызывает TypeError"""
+    smartphone = Smartphone("Samsung", "Galaxy", 100000.0, 5, 95.5, "S23", 256, "Серый")
+    grass = LawnGrass("Газон", "Элитная трава", 500.0, 20, "Россия", "7 дней", "Зеленый")
+
+    with pytest.raises(TypeError):
+        _ = smartphone + grass
+
+
+def test_add_product_allows_only_product_instances() -> None:
+    """Можно добавлять только объекты Product и его наследников"""
+    smartphone = Smartphone("Samsung", "Galaxy", 100000.0, 5, 95.5, "S23", 256, "Серый")
+    category = Category("Смартфоны", "Описание", [])
+
+    category.add_product(smartphone)
+    assert len(category.products) == 1
+
+    with pytest.raises(TypeError):
+        category.add_product("Не продукт")
