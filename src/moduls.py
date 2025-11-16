@@ -41,10 +41,8 @@ class Product(InitInfoMixin, BaseProduct):
     """Класс для общего продукта"""
 
     def __init__(self, name: str, description: str, price: float, quantity: int):
-        self.name = name
-        self.description = description
-        self.price = price
-        self.quantity = quantity
+        if quantity == 0:
+            raise ValueError("Товар с нулевым количеством не может быть добавлен")
         super().__init__(name, description, price, quantity)
 
     def __str__(self) -> str:
@@ -135,6 +133,17 @@ class Category(BaseEntity):
         """Возвращает строковое представление категории"""
         total_quantity = sum(p.quantity for p in self.__products)
         return f"{self.name}, количество продуктов: {total_quantity} шт."
+
+    def middle_price(self) -> float:
+        """Возвращает средний ценник всех товаров категории."""
+        try:
+            total: float = 0.0
+            for p in self.products:
+                total += p.price
+            count = len(self.products)
+            return total / count
+        except ZeroDivisionError:
+            return 0.0
 
 
 class CategoryIterator:
