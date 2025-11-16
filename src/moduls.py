@@ -37,12 +37,18 @@ class InitInfoMixin:
         return f"<{self.__class__.__name__}: {vars(self)}>"
 
 
+class ZeroQuantityError(ValueError):
+    """Вызывается при попытке добавить товар с нулевым количеством"""
+
+    pass
+
+
 class Product(InitInfoMixin, BaseProduct):
     """Класс для общего продукта"""
 
     def __init__(self, name: str, description: str, price: float, quantity: int):
         if quantity == 0:
-            raise ValueError("Товар с нулевым количеством не может быть добавлен")
+            raise ZeroQuantityError("Товар с нулевым количеством не может быть добавлен")
         super().__init__(name, description, price, quantity)
 
     def __str__(self) -> str:

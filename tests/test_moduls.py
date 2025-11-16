@@ -111,7 +111,7 @@ def test_add_product_allows_only_product_instances() -> None:
     assert len(category.products) == 1
 
     with pytest.raises(TypeError):
-        category.add_product("Не продукт")
+        category.add_product("Не продукт") #type: ignore
 
 
 def test_inheritance_from_baseproduct():
@@ -152,3 +152,25 @@ def test_category_add_product_typecheck():
 
     with pytest.raises(TypeError):
         cat.add_product("Не продукт")
+
+
+def test_product_zero_quantity_raises_valueerror():
+    """Проверка, что при нулевом количестве выбрасывается ValueError"""
+    with pytest.raises(ValueError, match="Товар с нулевым количеством не может быть добавлен"):
+        Product("Бракованный товар", "Неверное количество", 1000.0, 0)
+
+
+def test_category_middle_price():
+    """Проверка расчета среднего ценника категории"""
+    p1 = Product("Товар 1", "Описание 1", 100.0, 5)
+    p2 = Product("Товар 2", "Описание 2", 200.0, 3)
+    category = Category("Категория", "Описание", [p1, p2])
+
+    expected_avg = (p1.price + p2.price) / 2
+    assert category.middle_price() == expected_avg
+
+
+def test_category_middle_price_empty():
+    """Проверка среднего ценника пустой категории"""
+    category = Category("Пустая категория", "Описание", [])
+    assert category.middle_price() == 0

@@ -1,5 +1,5 @@
 from src.data_loader import load_categories_from_json
-from src.moduls import Category, CategoryIterator, LawnGrass, Order, Product, Smartphone
+from src.moduls import Category, CategoryIterator, LawnGrass, Order, Product, Smartphone, ZeroQuantityError
 
 if __name__ == "__main__":
     product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
@@ -239,3 +239,13 @@ if __name__ == "__main__":
 
     category_empty = Category("Пустая категория", "Категория без продуктов", [])
     print(category_empty.middle_price())
+
+if __name__ == "__main__":
+    try:
+        product_invalid = Product("Бракованный товар", "Описание", 1000.0, 0)
+    except ZeroQuantityError as e:
+        print(f"Ошибка: {e}")
+    else:
+        print("Товар успешно добавлен")
+    finally:
+        print("Обработка добавления товара завершена")
