@@ -1,60 +1,61 @@
-from typing import Any, Dict, List, Optional
+from abc import ABC, abstractmethod
+from typing import Any, List, Optional
 
 
-class Product:
-    name: str
-    description: str
-    price: float
-    quantity: int
+class BaseProduct(ABC):
+    """Абстрактный класс для всех продуктов"""
 
+    @abstractmethod
     def __init__(self, name: str, description: str, price: float, quantity: int):
         self.name = name
         self.description = description
-        self.__price = price
+        self.price = price
         self.quantity = quantity
 
-    @property  # type: ignore[no-redef]
-    def price(self) -> float:
-        """Геттер для цены"""
-        return self.__price
+    @abstractmethod
+    def __add__(self, other: "BaseProduct") -> float:
+        pass
 
-    @price.setter
-    def price(self, new_price: float) -> None:
-        """Сеттер для цены с проверкой на положительное значение"""
-        if new_price <= 0:
-            print("Цена не должна быть нулевая или отрицательная")
-            return
-        if new_price < self.__price:
-            answer = input(f"Вы действительно хотите понизить цену с {self.__price} до {new_price}? (y/n): ").lower()
-            if answer != "y":
-                print("Действие отменено. Цена не изменена.")
-                return
 
-        self.__price = new_price
+class BaseEntity(ABC):
+    """Абстрактный класс для объектов с названием и количеством (Category и Order)"""
 
-    @classmethod
-    def new_product(cls, data: Dict[str, Any], existing_products: Optional[List["Product"]] = None) -> "Product":
+    @abstractmethod
+    def __init__(self, name: str, quantity: int):
+        self.name = name
+        self.quantity = quantity
 
-        if existing_products is None:
-            existing_products = []
 
-        for product in existing_products:
-            if product.name == data["name"]:
-                product.quantity += data["quantity"]
-                if data["price"] > product.price:
-                    product.price = data["price"]
-                return product
+class InitInfoMixin:
+    """Миксин для вывода информации о созданном объекте"""
 
-        new_product = cls(
-            name=data["name"], description=data["description"], price=data["price"], quantity=data["quantity"]
-        )
-        return new_product
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        print(f"Создан объект класса {self.__class__.__name__} с параметрами {kwargs or args}")
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__}: {vars(self)}>"
+
+
+class ZeroQuantityError(ValueError):
+    """Вызывается при попытке добавить товар с нулевым количеством"""
+
+    pass
+
+
+class Product(InitInfoMixin, BaseProduct):
+    """Класс для общего продукта"""
+
+    def __init__(self, name: str, description: str, price: float, quantity: int):
+        if quantity == 0:
+            raise ZeroQuantityError("Товар с нулевым количеством не может быть добавлен")
+        super().__init__(name, description, price, quantity)
 
     def __str__(self) -> str:
         """Возвращает строковое представление продукта"""
         return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
 
-    def __add__(self, other: "Product") -> float:
+    def __add__(self, other: "BaseProduct") -> float:
         """Возвращает сумму стоимости остатков двух продуктов"""
         if type(self) is not type(other):
             raise TypeError("Нельзя складывать товары разных типов")
@@ -102,18 +103,14 @@ class LawnGrass(Product):
         self.color = color
 
 
-class Category:
+class Category(BaseEntity):
     category_count: int = 0
     product_count: int = 0
 
-    name: str
-    description: str
-    __products: List[Product]
-
     def __init__(self, name: str, description: str, products: Optional[List[Product]] = None) -> None:
-        self.name = name
+        super().__init__(name, quantity=len(products) if products else 0)
         self.description = description
-        self.__products = products if products is not None else []
+        self.__products = products if products else []
 
         Category.category_count += 1
         Category.product_count += len(self.__products)
@@ -140,10 +137,19 @@ class Category:
 
     def __str__(self) -> str:
         """Возвращает строковое представление категории"""
-        total_quantity = 0
-        for product in self.__products:
-            total_quantity += product.quantity
+        total_quantity = sum(p.quantity for p in self.__products)
         return f"{self.name}, количество продуктов: {total_quantity} шт."
+
+    def middle_price(self) -> float:
+        """Возвращает средний ценник всех товаров категории."""
+        try:
+            total: float = 0.0
+            for p in self.products:
+                total += p.price
+            count = len(self.products)
+            return total / count
+        except ZeroDivisionError:
+            return 0.0
 
 
 class CategoryIterator:
@@ -161,3 +167,17 @@ class CategoryIterator:
             return product
         else:
             raise StopIteration
+
+
+class Order(BaseEntity):
+    """Класс заказа: один продукт, количество и итоговая стоимость"""
+
+    def __init__(self, product: Product, quantity: int):
+        if quantity > product.quantity:
+            raise ValueError("Недостаточно товара на складе")
+        super().__init__(product.name, quantity)
+        self.product = product
+        self.total_price = product.price * quantity
+
+    def __str__(self) -> str:
+        return f"Заказ: {self.product.name}, количество: {self.quantity}, итого: {self.total_price} руб."

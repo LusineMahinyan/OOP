@@ -2,7 +2,7 @@ from typing import List
 
 import pytest
 
-from src.moduls import Category, Product, Smartphone, LawnGrass
+from src.moduls import Category, Product, Smartphone, LawnGrass, BaseProduct
 
 
 @pytest.fixture
@@ -59,31 +59,6 @@ def test_add_product(category: Category) -> None:
     assert "OnePlus 12" in category.products_str()
 
 
-def test_product_price_setter_positive() -> None:
-    """Проверка корректного изменения цены"""
-    product = Product("Xiaomi", "128GB", 31000.0, 10)
-    product.price = 35000.0
-    assert product.price == 35000.0
-
-
-def test_product_price_setter_negative(capsys) -> None:
-    """Проверка на отрицательную цену"""
-    product = Product("Xiaomi", "128GB", 31000.0, 10)
-    product.price = -100
-    captured = capsys.readouterr()
-    assert "Цена не должна быть нулевая или отрицательная" in captured.out
-    assert product.price == 31000.0
-
-
-def test_new_product_merges_existing() -> None:
-    """Проверка слияния товаров при одинаковом имени"""
-    existing = [Product("Iphone 15", "512GB", 200000.0, 5)]
-    new_data = {"name": "Iphone 15", "description": "512GB", "price": 210000.0, "quantity": 3}
-    product = Product.new_product(new_data, existing)
-    assert product.quantity == 8
-    assert product.price == 210000.0
-
-
 def test_product_str() -> None:
     product = Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
     assert str(product) == "Iphone 15, 210000.0 руб. Остаток: 8 шт."
@@ -118,14 +93,6 @@ def test_lawngrass_inherits_product() -> None:
     assert grass.color == "Зеленый"
 
 
-def test_add_same_class_products() -> None:
-    """Складывание продуктов одного класса"""
-    smartphone1 = Smartphone("Iphone 15", "512GB", 200000.0, 5, 97.0, "15 Pro", 512, "Gray")
-    smartphone2 = Smartphone("Iphone 14", "256GB", 150000.0, 3, 90.0, "14 Pro", 256, "Black")
-    result = smartphone1 + smartphone2
-    assert result == (200000.0 * 5) + (150000.0 * 3)
-
-
 def test_add_different_class_products_raises_typeerror() -> None:
     """Попытка сложить продукты разных классов вызывает TypeError"""
     smartphone = Smartphone("Samsung", "Galaxy", 100000.0, 5, 95.5, "S23", 256, "Серый")
@@ -144,4 +111,66 @@ def test_add_product_allows_only_product_instances() -> None:
     assert len(category.products) == 1
 
     with pytest.raises(TypeError):
-        category.add_product("Не продукт")
+        category.add_product("Не продукт") #type: ignore
+
+
+def test_inheritance_from_baseproduct():
+    p = Product("Test", "Desc", 100, 1)
+    s = Smartphone("TestPhone", "Desc", 200, 2, 90, "X", 128, "Black")
+    g = LawnGrass("Grass", "Desc", 50, 10, "RU", "5 дней", "Green")
+
+    assert isinstance(p, BaseProduct)
+    assert isinstance(s, BaseProduct)
+    assert isinstance(g, BaseProduct)
+
+
+
+def test_add_same_class_products():
+    p1 = Product("A", "Desc", 100, 2)
+    p2 = Product("B", "Desc", 200, 3)
+    s1 = Smartphone("Phone1", "Desc", 200, 1, 90, "X", 128, "Black")
+    s2 = Smartphone("Phone2", "Desc", 300, 2, 95, "Y", 256, "White")
+
+    assert p1 + p2 == 100 * 2 + 200 * 3
+    assert s1 + s2 == 200 * 1 + 300 * 2
+
+
+def test_add_different_class_raises_typeerror():
+    p = Product("A", "Desc", 100, 1)
+    g = LawnGrass("Grass", "Desc", 50, 10, "RU", "5 дней", "Green")
+
+    with pytest.raises(TypeError):
+        _ = p + g
+
+
+def test_category_add_product_typecheck():
+    from src.moduls import Category
+    cat = Category("TestCat", "Desc", [])
+    p = Product("A", "Desc", 100, 1)
+
+    cat.add_product(p)
+
+    with pytest.raises(TypeError):
+        cat.add_product("Не продукт")
+
+
+def test_product_zero_quantity_raises_valueerror():
+    """Проверка, что при нулевом количестве выбрасывается ValueError"""
+    with pytest.raises(ValueError, match="Товар с нулевым количеством не может быть добавлен"):
+        Product("Бракованный товар", "Неверное количество", 1000.0, 0)
+
+
+def test_category_middle_price():
+    """Проверка расчета среднего ценника категории"""
+    p1 = Product("Товар 1", "Описание 1", 100.0, 5)
+    p2 = Product("Товар 2", "Описание 2", 200.0, 3)
+    category = Category("Категория", "Описание", [p1, p2])
+
+    expected_avg = (p1.price + p2.price) / 2
+    assert category.middle_price() == expected_avg
+
+
+def test_category_middle_price_empty():
+    """Проверка среднего ценника пустой категории"""
+    category = Category("Пустая категория", "Описание", [])
+    assert category.middle_price() == 0
